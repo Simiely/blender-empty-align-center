@@ -65,3 +65,23 @@ obj.data.transform(m)   # 顶点局部坐标补偿，网格世界位置精确不
 
 ### 6. 选择状态保护
 `preserve_selection` 上下文管理器：临时切换选择执行 origin_set 兜底后，自动恢复原选择与 active 对象。
+
+## 待优化(TODO) · 2026-08-21 实战发现(3ds Max 导入场景 260820x03.blend)
+
+> 来源:同日 blender-tips 实战。以下缺口在 3ds Max 导入场景(带缩放/旋转/负缩放/共享网格/动画残留)下真实触发过,下次迭代优先处理。
+
+### T1. multi-user 网格防护(最高优先)
+`set_origin_to_world_point` 调 `obj.data.transform(m)` 直接改顶点——当 `obj.data.users > 1`(多个对象共享同一 mesh 数据,3ds Max 导入常见)时,**一个对象改原点,所有共享者一起被改**。
+- 实测:260820x03 主装置集合 6 个对象 3 对共享网格(`对象245x_GeomAdjust` 共用 Mesh.462x)
+- 处理:入口处检测 `obj.data.users > 1` → 自动 `obj.data = obj.data.copy()`(独立副本,视觉不变)或弹提示让用户选择
+- 原生 origin_set 的 `transform_apply` 同样对 multi-user 报 `Cannot apply to a multi user`
+
+### T2. 动画对象检测
+带动画对象改原点会破坏动画语义:动画曲线记录的是"原点位置",原点移动后动画播放时对象整体偏移。
+- 现状:插件未检测 `obj.animation_data`,直接改
+- 处理:检测到动画 → 跳过并报告,或平移动画曲线(location fcurve 每关键帧 + delta)
+- 注意 5.2 slotted action:曲线遍历用 `action.fcurve_ensure_for_datablock(obj, path, index=i)`(slot 可能是空引用,导入残留)
+
+### T3. 负缩放/非均匀缩放验证
+3ds Max 导入对象常带**非单位缩放(0.006~0.594)+ 旋转,部分负缩放(镜像)**。原生 `origin_set` 对这类对象直接翻车(位置跳变),插件的手动矩阵法(`mw_new.inverted() @ mw_old`)理论上精确,但**未实测负缩放**。
+- 处理:补测试用例(负缩放矩形/非均匀缩放)验证 bbox 中心位移=0;不过可先用 blender-tips 安全流程:`transform_apply(rotation, scale)` 烘焙 → 再设原点
