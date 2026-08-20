@@ -1,7 +1,7 @@
 # AGENTS.md · 项目规则
 
-> 📌 **文档基线**：2026-08-17（首次推送 GitHub, commit `01120f7f`）完成四件套创建
-> 更新文档/代码后，请更新此行（日期 + 新 commit hash），并在 CHANGELOG 追加版本
+> 📌 **文档基线**:2026-08-21(commit 待回填)标记 3 项待优化(multi-user 网格 / 动画对象 / 负缩放验证)
+> 更新文档/代码后,请更新此行(日期 + 新 commit hash),并在 CHANGELOG 追加版本
 
 ## 技术栈
 
@@ -17,6 +17,7 @@
 - **Bezier 控制柄约束**：手动赋值 handle 坐标会被 Blender 按 ALIGNED/AUTO 约束重算导致形状变化 → 用官方 `obj.data.transform(matrix)` 处理几何数据
 - **Blender 5.x 图标枚举移除了旧图标**：`TRANSFORM` 已不存在（只有 `TRANSFORM_ORIGINS`）。icon 只用：`SNAP_ON`/`OBJECT_DATA`/`SNAP_FACE`/`PIVOT_BOUNDBOX`
 - **产品语义（用户明确）**：除「轴居中贴底并落地」外，所有按钮都是**轴体操作（原点定位），网格永远不动**。不要改成"整体移动物体"——v1.4.1 曾做错过方向，v1.4.2 已回改
+- **⚠️ 待优化(2026-08-21)**:① `obj.data.users > 1`(multi-user 共享网格)时 `data.transform` 会牵连所有共享者 → 先 `obj.data = obj.data.copy()`;② 带动画对象改原点会破坏动画(曲线记录旧原点位置)→ 检测 `obj.animation_data` 跳过或平移动画曲线;③ 负缩放/非均匀缩放对象未实测,3ds Max 导入场景必现(详见 DEVELOPMENT.md 待优化段)
 
 ## 约定
 
