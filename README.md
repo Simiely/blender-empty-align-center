@@ -1,3 +1,10 @@
+> [!IMPORTANT]
+> ## 📦 本仓库已归档 —— 请到统一插件集下载
+> 本插件已迁入 **[Simiely/blender-addons](https://github.com/Simiely/blender-addons)**，
+> 后续的版本更新与问题修复都在那边统一维护，**本仓库只读、不再更新**。
+>
+> 最新版下载：https://github.com/Simiely/blender-addons/tree/main/addons
+>
 # Blender 对象轴与居中工具（Empty Align Center）
 
 Blender 插件：把所有「轴体操作」统一在一个面板里 —— **物体（网格）永远不动，只改原点（轴）位置**。三个按钮递进，全部含子集、不限对象类型。
